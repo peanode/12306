@@ -4,14 +4,28 @@
 * Author By Peanode
 * https://github.com/peanode/12306
 */
-    class Huijia{
+
+    require_once('PHPMailer-5.2.9/PHPMailerAutoload.php');
+
+/**
+ * Class Huijia
+ */
+class Huijia{
         public $date_arr;
         public $train_arr;
         public $type_arr;
         public $url_arr;
         public $start_station;
         public $end_station;
-        public function __construct($date_arr, $start_station, $end_station, $train_arr, $type_arr){
+
+    /**
+     * @param $date_arr
+     * @param $start_station
+     * @param $end_station
+     * @param $train_arr
+     * @param $type_arr
+     */
+    public function __construct($date_arr, $start_station, $end_station, $train_arr, $type_arr){
             $this->setDateArr($date_arr);
             $this->setStartStation($start_station);
             $this->setEndStation($end_station);
@@ -19,74 +33,79 @@
             $this->setTypeArr($type_arr);
             $this->setUrlArr();
         }
-        /**
-         * @param Array $data_arr
-         */
-        public function setDateArr($date_arr)
-        {
-            if(empty($date_arr) || !is_array($date_arr)){
-                exit('Date is NULL');
-            }
-            $this->date_arr = $date_arr;
-        }
 
-        /**
-         * @param Array $start_station
-         */
-        public function setStartStation($start_station)
-        {
-            if(empty($start_station) || !is_array($start_station)){
-                exit('START station is NULL');
-            }
-            $this->start_station = $start_station;
+    /**
+     * @param Array $data_arr
+     */
+    public function setDateArr($date_arr)
+    {
+        if(empty($date_arr) || !is_array($date_arr)){
+            exit('Date is NULL');
         }
+        $this->date_arr = $date_arr;
+    }
 
-        /**
-         * @param mixed $end_station
-         */
-        public function setEndStation($end_station)
-        {
-            if(empty($end_station) || !is_array($end_station)){
-                exit('END station is NULL');
-            }
-            $this->end_station = $end_station;
+    /**
+     * @param Array $start_station
+     */
+    public function setStartStation($start_station)
+    {
+        if(empty($start_station) || !is_array($start_station)){
+            exit('START station is NULL');
         }
+        $this->start_station = $start_station;
+    }
 
-        /**
-         * @param Array $train_arr
-         */
-        public function setTrainArr($train_arr)
-        {
-            $this->train_arr = $train_arr;
+    /**
+     * @param mixed $end_station
+     */
+    public function setEndStation($end_station)
+    {
+        if(empty($end_station) || !is_array($end_station)){
+            exit('END station is NULL');
         }
+        $this->end_station = $end_station;
+    }
 
-        /**
-         * @param Array $type_arr
-         */
-        public function setTypeArr($type_arr)
-        {
-            if(empty($type_arr) || !is_array($type_arr)){
-                exit('Type is NULL');
-            }
-            $this->type_arr = $type_arr;
+    /**
+     * @param Array $train_arr
+     */
+    public function setTrainArr($train_arr)
+    {
+        $this->train_arr = $train_arr;
+    }
+
+    /**
+     * @param Array $type_arr
+     */
+    public function setTypeArr($type_arr)
+    {
+        if(empty($type_arr) || !is_array($type_arr)){
+            exit('Type is NULL');
         }
+        $this->type_arr = $type_arr;
+    }
 
-        /**
-         * @param Array $url_arr
-         */
-        public function setUrlArr()
-        {
-            //https://kyfw.12306.cn/otn/lcxxcx/query?purpose_codes=ADULT&queryDate=2015-02-15&from_station=HZH&to_station=WHN
-            foreach($this->start_station as $start){
-                foreach($this->end_station as $end){
-                    foreach($this->date_arr as $date){
-                        $this->url_arr[] = 'https://kyfw.12306.cn/otn/lcxxcx/query?purpose_codes=ADULT&queryDate='.$date.'&from_station='.$start.'&to_station='.$end;
-                    }
+    /**
+     * @param Array $url_arr
+     */
+    public function setUrlArr()
+    {
+        //https://kyfw.12306.cn/otn/lcxxcx/query?purpose_codes=ADULT&queryDate=2015-02-15&from_station=HZH&to_station=WHN
+        foreach($this->start_station as $start){
+            foreach($this->end_station as $end){
+                foreach($this->date_arr as $date){
+                    $this->url_arr[] = 'https://kyfw.12306.cn/otn/lcxxcx/query?purpose_codes=ADULT&queryDate='.$date.'&from_station='.$start.'&to_station='.$end;
                 }
             }
         }
+    }
 
-        public function getSslPage($url) {
+    /**
+     * @param $url
+     * @return string
+     */
+    public function getSslPage($url) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
             curl_setopt($ch, CURLOPT_HEADER, false);
@@ -99,7 +118,11 @@
             return $result;
         }
 
-        public function checkAvailable($json) {
+    /**
+     * @param $json
+     * @return array
+     */
+    public function checkAvailable($json) {
             $data_arr = json_decode($json, TRUE);
             $return = array();
             if(!isset($data_arr['data']['datas'])){
@@ -130,7 +153,10 @@
             return $return;
         }
 
-        public  function checkTicket(){
+    /**
+     * @return bool|string
+     */
+    public  function checkTicket(){
             if(!is_array($this->url_arr) || empty($this->url_arr)){
                 exit('URL list is NULL');
             }
@@ -150,7 +176,12 @@
                 return false;
             }
         }
-        public function getHtmlContent($result){
+
+    /**
+     * @param $result
+     * @return string
+     */
+    public function getHtmlContent($result){
             $html = '<style type="text/css">table,thead,thead,th,td{font-family: Tahoma,"宋体";font-size: 12px;margin: 0;padding: 0;text-align: center;border: 0;}table{border-collapse:collapse;}thead th{margin: 0;padding-top: 5px;padding-bottom: 5px;color: #fff;line-height: 18px;background: #3295D3;border: 1px #B0CEDD solid;}tbody th{margin: 0;padding-top: 5px;padding-bottom: 5px;font-size: 10px;font-weight: normal;line-height: 20px;border: 1px #B0CEDD solid;}</style><table><thead><th width="70px">日期</th><th width="50px">车次</th><th width="60px">出发/<br />到达</th><th width="60px">出发时间/<br />到达时间</th><th width="50px">历时</th><th width="40px">商务座</th><th width="40px">特等座</th><th width="40px">一等座</th><th width="40px">二等座</th><th width="50px">高级软卧</th><th width="40px">软卧</th><th width="40px">硬卧</th><th width="40px">软座</th><th width="40px">硬座</th><th width="40px">无座</th><th width="40px">其他</th></thead><tbody>';
             foreach ($result as $num) {
                 foreach ($num as $date => $train) {
@@ -165,7 +196,12 @@
             }
             return $html.'</tbody></table>';
         }
-        public function sendMail($content){
+
+
+    /**
+     * @param $content
+     */
+    public function sendMail($content){
             $mail = new PHPmailer;
             $mail->isSMTP();
             $mail->SMTPDebug = 1;
@@ -193,7 +229,10 @@
         }
     }
 
-    require_once('PHPMailer-5.2.9/PHPMailerAutoload.php');
+    //================================================================================================================
+    // 分割线
+    //================================================================================================================
+
 
     // 日期
     $date_arr = array(
